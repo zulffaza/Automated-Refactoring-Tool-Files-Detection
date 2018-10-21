@@ -2,7 +2,7 @@ package com.finalproject.automated.refactoring.tool.files.detection.service.impl
 
 import com.finalproject.automated.refactoring.tool.files.detection.model.FileModel;
 import com.finalproject.automated.refactoring.tool.files.detection.service.FilesDetectionThread;
-import com.sun.xml.internal.ws.util.CompletedFuture;
+import com.finalproject.automated.refactoring.tool.utils.service.ThreadsWatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
@@ -38,17 +40,49 @@ public class JavaFilesDetectionTest {
     @MockBean
     private FilesDetectionThread filesDetectionThread;
 
+    @MockBean
+    private ThreadsWatcher threadsWatcher;
+
     private static final String PATH = "src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation";
     private static final String FILES_EXTENSION = ".java";
 
     private static final Integer NUMBER_OF_PATH = 3;
+    private static final Integer WAITING_TIME = 500;
 
     @Before
     public void setUp() {
-        Future future = new CompletedFuture<>(null, null);
+        Future future = new Future() {
+
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public Object get() {
+                return null;
+            }
+
+            @Override
+            public Object get(long timeout, TimeUnit unit) {
+                return null;
+            }
+        };
 
         when(filesDetectionThread.detect(eq(PATH), eq(FILES_EXTENSION),
                 eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(future);
+        doNothing().when(threadsWatcher)
+                .waitAllThreadsDone(eq(Collections.singletonList(future)), eq(WAITING_TIME));
     }
 
     @Test
