@@ -1,12 +1,12 @@
-package com.finalproject.automated.refactoring.tool.files.detection.configuration;
+package com.finalproject.automated.refactoring.tool.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- * @author Faza Zulfika P P
+ * @author fazazulfikapp
  * @version 1.0.0
- * @since 7 October 2018
+ * @since 1 November 2018
  */
 
 @Configuration
