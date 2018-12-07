@@ -8,8 +8,12 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * @author Faza Zulfika P P
@@ -18,7 +22,7 @@ import java.util.concurrent.Future;
  */
 
 @Service
-public class JavaFilesDetection implements FilesDetection {
+public class FilesDetectionImpl implements FilesDetection {
 
     @Autowired
     private FilesDetectionThread filesDetectionThread;
@@ -28,32 +32,26 @@ public class JavaFilesDetection implements FilesDetection {
 
     private static final Integer WAITING_TIME = 500;
 
-    private static final String FILES_EXTENSION = ".java";
-
     @Override
-    public List<FileModel> detect(@NonNull String path) {
-        return detect(Collections.singletonList(path))
+    public List<FileModel> detect(@NonNull String path, @NonNull String fileExtension) {
+        return detect(Collections.singletonList(path), fileExtension)
                 .get(path);
     }
 
     @Override
-    public Map<String, List<FileModel>> detect(@NonNull List<String> paths) {
+    public Map<String, List<FileModel>> detect(@NonNull List<String> paths, @NonNull String fileExtension) {
         Map<String, List<FileModel>> result = Collections.synchronizedMap(new HashMap<>());
-        List<Future> futures = new ArrayList<>();
+        List<Future> threads = doFilesDetection(paths, fileExtension, result);
 
-        doFilesDetection(paths, futures, result);
-        threadsWatcher.waitAllThreadsDone(futures, WAITING_TIME);
+        threadsWatcher.waitAllThreadsDone(threads, WAITING_TIME);
 
         return result;
     }
 
-    private void doFilesDetection(List<String> paths, List<Future> futures, Map<String, List<FileModel>> result) {
-        paths.forEach(path ->
-                doFileDetection(path, futures, result));
-    }
-
-    private void doFileDetection(String path, List<Future> futures, Map<String, List<FileModel>> result) {
-        Future future = filesDetectionThread.detect(path, FILES_EXTENSION, result);
-        futures.add(future);
+    private List<Future> doFilesDetection(List<String> paths, String fileExtension,
+                                          Map<String, List<FileModel>> result) {
+        return paths.stream()
+                .map(path -> filesDetectionThread.detect(path, fileExtension, result))
+                .collect(Collectors.toList());
     }
 }

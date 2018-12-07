@@ -31,6 +31,7 @@ public class ApplicationTest {
     private FilesDetection filesDetection;
 
     private static final String PATH = "src";
+    private static final String FILES_EXTENSION = ".java";
 
     private static final Integer NUMBER_OF_PATH = 3;
 
@@ -43,7 +44,7 @@ public class ApplicationTest {
 
     @Test
     public void filesDetection_singlePath_success() {
-        List<FileModel> fileModels = filesDetection.detect(PATH);
+        List<FileModel> fileModels = filesDetection.detect(PATH, FILES_EXTENSION);
 
         assertEquals(fileModelsExpected.size(), fileModels.size());
         assertFileModels(fileModels);
@@ -51,7 +52,8 @@ public class ApplicationTest {
 
     @Test
     public void filesDetection_multiPath_success() {
-        Map<String, List<FileModel>> result = filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH));
+        Map<String, List<FileModel>> result = filesDetection.detect(
+                Collections.nCopies(NUMBER_OF_PATH, PATH), FILES_EXTENSION);
 
         result.forEach((path, fileModels) -> {
             assertEquals(PATH, path);
@@ -63,13 +65,23 @@ public class ApplicationTest {
     @Test(expected = NullPointerException.class)
     public void filesDetection_singlePath_failed_pathIsNull() {
         String path = null;
-        filesDetection.detect(path);
+        filesDetection.detect(path, FILES_EXTENSION);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void filesDetection_singlePath_failed_fileExtensionIsNull() {
+        filesDetection.detect(PATH, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void filesDetection_multiPath_failed_listOfPathIsNull() {
         List<String> paths = null;
-        filesDetection.detect(paths);
+        filesDetection.detect(paths, FILES_EXTENSION);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void filesDetection_multiPath_failed_fileExtensionIsNull() {
+        filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH), null);
     }
 
     private List<FileModel> createFileModelsExpected() {
@@ -82,12 +94,12 @@ public class ApplicationTest {
 
         fileModels.add(FileModel.builder()
                 .path("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("JavaFilesDetectionTest.java")
+                .filename("FilesDetectionThreadImplTest.java")
                 .build());
 
         fileModels.add(FileModel.builder()
                 .path("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("FilesDetectionThreadImplTest.java")
+                .filename("FilesDetectionImplTest.java")
                 .build());
 
         fileModels.add(FileModel.builder()
@@ -117,7 +129,7 @@ public class ApplicationTest {
 
         fileModels.add(FileModel.builder()
                 .path("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("JavaFilesDetection.java")
+                .filename("FilesDetectionImpl.java")
                 .build());
 
         return fileModels;

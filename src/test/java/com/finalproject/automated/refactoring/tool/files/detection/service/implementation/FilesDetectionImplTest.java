@@ -32,10 +32,10 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class JavaFilesDetectionTest {
+public class FilesDetectionImplTest {
 
     @Autowired
-    private JavaFilesDetection filesDetection;
+    private FilesDetectionImpl filesDetection;
 
     @MockBean
     private FilesDetectionThread filesDetectionThread;
@@ -43,7 +43,7 @@ public class JavaFilesDetectionTest {
     @MockBean
     private ThreadsWatcher threadsWatcher;
 
-    private static final String PATH = "src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation";
+    private static final String PATH = "src";
     private static final String FILES_EXTENSION = ".java";
 
     private static final Integer NUMBER_OF_PATH = 3;
@@ -51,7 +51,7 @@ public class JavaFilesDetectionTest {
 
     @Before
     public void setUp() {
-        Future future = new Future() {
+        Future thread = new Future() {
 
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -80,32 +80,43 @@ public class JavaFilesDetectionTest {
         };
 
         when(filesDetectionThread.detect(eq(PATH), eq(FILES_EXTENSION),
-                eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(future);
+                eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(thread);
         doNothing().when(threadsWatcher)
-                .waitAllThreadsDone(eq(Collections.singletonList(future)), eq(WAITING_TIME));
+                .waitAllThreadsDone(eq(Collections.singletonList(thread)), eq(WAITING_TIME));
     }
 
     @Test
     public void detect_singlePath_success() {
-        List<FileModel> result = filesDetection.detect(PATH);
+        List<FileModel> result = filesDetection.detect(PATH, FILES_EXTENSION);
         assertNull(result);
     }
 
     @Test
     public void detect_multiPath_success() {
-        Map<String, List<FileModel>> result = filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH));
+        Map<String, List<FileModel>> result = filesDetection.detect(
+                Collections.nCopies(NUMBER_OF_PATH, PATH), FILES_EXTENSION);
         assertNotNull(result);
     }
 
     @Test(expected = NullPointerException.class)
     public void detect_singlePath_failed_pathIsNull() {
         String path = null;
-        filesDetection.detect(path);
+        filesDetection.detect(path, FILES_EXTENSION);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void detect_singlePath_failed_fileExtensionIsNull() {
+        filesDetection.detect(PATH, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void detect_multiPath_failed_listOfPathIsNull() {
         List<String> paths = null;
-        filesDetection.detect(paths);
+        filesDetection.detect(paths, FILES_EXTENSION);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void detect_multiPath_failed_fileExtensionIsNull() {
+        filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH), null);
     }
 }
