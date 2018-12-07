@@ -29,16 +29,16 @@ public class FilesDetectionThreadImplTest {
 
     @Test
     public void detect_success() {
-        String path = "src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation";
-        String fileType = ".java";
+        String path = "src";
+        String fileExtension = ".java";
 
         Integer pathCount = 1;
-        Integer classCount = 2;
+        Integer classCount = 9;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future future = filesDetectionThread.detect(path, fileType, result);
+        Future thread = filesDetectionThread.detect(path, fileExtension, result);
 
-        assertNull(future);
+        assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
         assertEquals(classCount.intValue(), result.get(path).size());
     }
@@ -46,29 +46,29 @@ public class FilesDetectionThreadImplTest {
     @Test
     public void detect_failed_pathNotFound() {
         String path = "not/found/path";
-        String fileType = ".java";
+        String fileExtension = ".java";
 
         Integer pathCount = 1;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future future = filesDetectionThread.detect(path, fileType, result);
+        Future thread = filesDetectionThread.detect(path, fileExtension, result);
 
-        assertNull(future);
+        assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
         assertNull(result.get(path));
     }
 
     @Test(expected = NullPointerException.class)
     public void detect_failed_pathIsNull() {
-        String fileType = ".java";
+        String fileExtension = ".java";
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        filesDetectionThread.detect(null, fileType, result);
+        filesDetectionThread.detect(null, fileExtension, result);
     }
 
     @Test(expected = NullPointerException.class)
-    public void detect_failed_fileTypeIsNull() {
-        String path = "src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation";
+    public void detect_failed_fileExtensionIsNull() {
+        String path = "src";
 
         Map<String, List<FileModel>> result = new HashMap<>();
         filesDetectionThread.detect(path, null, result);
@@ -76,9 +76,9 @@ public class FilesDetectionThreadImplTest {
 
     @Test(expected = NullPointerException.class)
     public void detect_failed_resultIsNull() {
-        String path = "src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation";
-        String fileType = ".java";
+        String path = "src";
+        String fileExtension = ".java";
 
-        filesDetectionThread.detect(path, fileType, null);
+        filesDetectionThread.detect(path, fileExtension, null);
     }
 }

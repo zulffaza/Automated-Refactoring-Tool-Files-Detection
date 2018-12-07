@@ -28,20 +28,19 @@ public class FilesDetectionThreadImpl implements FilesDetectionThread {
 
     @Async
     @Override
-    public Future detect(@NonNull String path, @NonNull String fileType,
+    public Future detect(@NonNull String path, @NonNull String fileExtension,
                          @NonNull Map<String, List<FileModel>> result) {
-        List<FileModel> files = readAllFiles(path, fileType);
-        result.put(path, files);
-
+        result.put(path, readFiles(path, fileExtension));
         return null;
     }
 
-    private List<FileModel> readAllFiles(String path, String fileType) {
+    private List<FileModel> readFiles(String path, String fileExtension) {
         List<FileModel> result = null;
+        Path start = Paths.get(path);
 
         try {
-            result = Files.walk(Paths.get(path))
-                    .filter(subPath -> isSameFileType(subPath, fileType))
+            result = Files.walk(start)
+                    .filter(filePath -> isHasSameFileExtension(filePath, fileExtension))
                     .map(this::mapIntoFileModel)
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -51,26 +50,27 @@ public class FilesDetectionThreadImpl implements FilesDetectionThread {
         return result;
     }
 
-    private Boolean isSameFileType(Path path, String fileType) {
-        return path.toString().endsWith(fileType);
+    private Boolean isHasSameFileExtension(Path filePath, String fileExtension) {
+        return filePath.toString()
+                .endsWith(fileExtension);
     }
 
-    private FileModel mapIntoFileModel(Path path) {
+    private FileModel mapIntoFileModel(Path filePath) {
         return FileModel.builder()
-                .path(path.getParent().toString())
-                .content(getFileContent(path))
-                .filename(path.getFileName().toString())
+                .path(filePath.getParent().toString())
+                .content(getFileContent(filePath))
+                .filename(filePath.getFileName().toString())
                 .build();
     }
 
-    private String getFileContent(Path path) {
+    private String getFileContent(Path filePath) {
         String result = null;
 
         try {
-            result = Files.lines(path)
+            result = Files.lines(filePath)
                     .collect(Collectors.joining(NEW_LINE_DELIMITER));
         } catch (IOException e) {
-            printPathError(path.toString());
+            printPathError(filePath.toString());
         }
 
         return result;
