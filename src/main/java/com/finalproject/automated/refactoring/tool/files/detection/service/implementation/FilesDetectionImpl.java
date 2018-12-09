@@ -6,6 +6,7 @@ import com.finalproject.automated.refactoring.tool.files.detection.service.Files
 import com.finalproject.automated.refactoring.tool.utils.service.ThreadsWatcher;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -30,7 +31,8 @@ public class FilesDetectionImpl implements FilesDetection {
     @Autowired
     private ThreadsWatcher threadsWatcher;
 
-    private static final Integer WAITING_TIME = 500;
+    @Value("${threads.waiting.time}")
+    private Integer waitingTime;
 
     @Override
     public List<FileModel> detect(@NonNull String path, @NonNull String fileExtension) {
@@ -43,7 +45,7 @@ public class FilesDetectionImpl implements FilesDetection {
         Map<String, List<FileModel>> result = Collections.synchronizedMap(new HashMap<>());
         List<Future> threads = doFilesDetection(paths, fileExtension, result);
 
-        threadsWatcher.waitAllThreadsDone(threads, WAITING_TIME);
+        threadsWatcher.waitAllThreadsDone(threads, waitingTime);
 
         return result;
     }
