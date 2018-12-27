@@ -139,6 +139,6 @@ public class FilesDetectionImplTest {
     private void verifyThreadsWatcher() {
         verify(threadsWatcher, times(INVOKED_ONCE))
                 .waitAllThreadsDone(anyList(), eq(waitingTime));
-        verifyNoMoreInteractions(filesDetectionThread);
+        verifyNoMoreInteractions(threadsWatcher);
     }
 }
