@@ -21,9 +21,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Faza Zulfika P P
@@ -51,6 +51,7 @@ public class FilesDetectionImplTest {
     private static final String FILES_EXTENSION = ".java";
 
     private static final Integer NUMBER_OF_PATH = 3;
+    private static final Integer INVOKED_ONCE = 1;
 
     @Before
     public void setUp() {
@@ -85,13 +86,16 @@ public class FilesDetectionImplTest {
         when(filesDetectionThread.detect(eq(PATH), eq(FILES_EXTENSION),
                 eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(thread);
         doNothing().when(threadsWatcher)
-                .waitAllThreadsDone(eq(Collections.singletonList(thread)), eq(waitingTime));
+                .waitAllThreadsDone(anyList(), eq(waitingTime));
     }
 
     @Test
     public void detect_singlePath_success() {
         List<FileModel> result = filesDetection.detect(PATH, FILES_EXTENSION);
         assertNull(result);
+
+        verifyFilesDetectionThread(INVOKED_ONCE);
+        verifyThreadsWatcher();
     }
 
     @Test
@@ -99,6 +103,9 @@ public class FilesDetectionImplTest {
         Map<String, List<FileModel>> result = filesDetection.detect(
                 Collections.nCopies(NUMBER_OF_PATH, PATH), FILES_EXTENSION);
         assertNotNull(result);
+
+        verifyFilesDetectionThread(NUMBER_OF_PATH);
+        verifyThreadsWatcher();
     }
 
     @Test(expected = NullPointerException.class)
@@ -121,5 +128,17 @@ public class FilesDetectionImplTest {
     @Test(expected = NullPointerException.class)
     public void detect_multiPath_failed_fileExtensionIsNull() {
         filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH), null);
+    }
+
+    private void verifyFilesDetectionThread(Integer invocationsTimes) {
+        verify(filesDetectionThread, times(invocationsTimes)).detect(eq(PATH), eq(FILES_EXTENSION),
+                eq(Collections.synchronizedMap(new HashMap<>())));
+        verifyNoMoreInteractions(filesDetectionThread);
+    }
+
+    private void verifyThreadsWatcher() {
+        verify(threadsWatcher, times(INVOKED_ONCE))
+                .waitAllThreadsDone(anyList(), eq(waitingTime));
+        verifyNoMoreInteractions(filesDetectionThread);
     }
 }
