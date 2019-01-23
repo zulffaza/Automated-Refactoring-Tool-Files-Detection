@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface FilesDetection {
 
-    List<FileModel> detect(@NonNull String path, @NonNull String fileExtension);
+    List<FileModel> detect(@NonNull String path, @NonNull String mimeType);
 
-    Map<String, List<FileModel>> detect(@NonNull List<String> paths, @NonNull String fileExtension);
+    Map<String, List<FileModel>> detect(@NonNull List<String> paths, @NonNull String mimeType);
 }

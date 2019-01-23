@@ -35,25 +35,25 @@ public class FilesDetectionImpl implements FilesDetection {
     private Integer waitingTime;
 
     @Override
-    public List<FileModel> detect(@NonNull String path, @NonNull String fileExtension) {
-        return detect(Collections.singletonList(path), fileExtension)
+    public List<FileModel> detect(@NonNull String path, @NonNull String mimeType) {
+        return detect(Collections.singletonList(path), mimeType)
                 .get(path);
     }
 
     @Override
-    public Map<String, List<FileModel>> detect(@NonNull List<String> paths, @NonNull String fileExtension) {
+    public Map<String, List<FileModel>> detect(@NonNull List<String> paths, @NonNull String mimeType) {
         Map<String, List<FileModel>> result = Collections.synchronizedMap(new HashMap<>());
-        List<Future> threads = doFilesDetection(paths, fileExtension, result);
+        List<Future> threads = doFilesDetection(paths, mimeType, result);
 
         threadsWatcher.waitAllThreadsDone(threads, waitingTime);
 
         return result;
     }
 
-    private List<Future> doFilesDetection(List<String> paths, String fileExtension,
+    private List<Future> doFilesDetection(List<String> paths, String mimeType,
                                           Map<String, List<FileModel>> result) {
         return paths.stream()
-                .map(path -> filesDetectionThread.detect(path, fileExtension, result))
+                .map(path -> filesDetectionThread.detect(path, mimeType, result))
                 .collect(Collectors.toList());
     }
 }
