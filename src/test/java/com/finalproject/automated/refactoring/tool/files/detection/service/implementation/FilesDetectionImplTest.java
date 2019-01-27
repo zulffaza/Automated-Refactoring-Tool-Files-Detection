@@ -48,7 +48,7 @@ public class FilesDetectionImplTest {
     private Integer waitingTime;
 
     private static final String PATH = "src";
-    private static final String FILES_EXTENSION = ".java";
+    private static final String MIME_TYPE = "text/x-java-source";
 
     private static final Integer NUMBER_OF_PATH = 3;
     private static final Integer INVOKED_ONCE = 1;
@@ -83,7 +83,7 @@ public class FilesDetectionImplTest {
             }
         };
 
-        when(filesDetectionThread.detect(eq(PATH), eq(FILES_EXTENSION),
+        when(filesDetectionThread.detect(eq(PATH), eq(MIME_TYPE),
                 eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(thread);
         doNothing().when(threadsWatcher)
                 .waitAllThreadsDone(anyList(), eq(waitingTime));
@@ -91,7 +91,7 @@ public class FilesDetectionImplTest {
 
     @Test
     public void detect_singlePath_success() {
-        List<FileModel> result = filesDetection.detect(PATH, FILES_EXTENSION);
+        List<FileModel> result = filesDetection.detect(PATH, MIME_TYPE);
         assertNull(result);
 
         verifyFilesDetectionThread(INVOKED_ONCE);
@@ -101,7 +101,7 @@ public class FilesDetectionImplTest {
     @Test
     public void detect_multiPath_success() {
         Map<String, List<FileModel>> result = filesDetection.detect(
-                Collections.nCopies(NUMBER_OF_PATH, PATH), FILES_EXTENSION);
+                Collections.nCopies(NUMBER_OF_PATH, PATH), MIME_TYPE);
         assertNotNull(result);
 
         verifyFilesDetectionThread(NUMBER_OF_PATH);
@@ -111,27 +111,27 @@ public class FilesDetectionImplTest {
     @Test(expected = NullPointerException.class)
     public void detect_singlePath_failed_pathIsNull() {
         String path = null;
-        filesDetection.detect(path, FILES_EXTENSION);
+        filesDetection.detect(path, MIME_TYPE);
     }
 
     @Test(expected = NullPointerException.class)
-    public void detect_singlePath_failed_fileExtensionIsNull() {
+    public void detect_singlePath_failed_mimeTypeIsNull() {
         filesDetection.detect(PATH, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void detect_multiPath_failed_listOfPathIsNull() {
         List<String> paths = null;
-        filesDetection.detect(paths, FILES_EXTENSION);
+        filesDetection.detect(paths, MIME_TYPE);
     }
 
     @Test(expected = NullPointerException.class)
-    public void detect_multiPath_failed_fileExtensionIsNull() {
+    public void detect_multiPath_failed_mimeTypeIsNull() {
         filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH), null);
     }
 
     private void verifyFilesDetectionThread(Integer invocationsTimes) {
-        verify(filesDetectionThread, times(invocationsTimes)).detect(eq(PATH), eq(FILES_EXTENSION),
+        verify(filesDetectionThread, times(invocationsTimes)).detect(eq(PATH), eq(MIME_TYPE),
                 eq(Collections.synchronizedMap(new HashMap<>())));
         verifyNoMoreInteractions(filesDetectionThread);
     }

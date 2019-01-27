@@ -3,6 +3,7 @@ package com.finalproject.automated.refactoring.tool.files.detection.service.impl
 import com.finalproject.automated.refactoring.tool.files.detection.model.FileModel;
 import com.finalproject.automated.refactoring.tool.files.detection.service.FilesDetectionThread;
 import lombok.NonNull;
+import org.apache.tika.Tika;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -28,19 +30,19 @@ public class FilesDetectionThreadImpl implements FilesDetectionThread {
 
     @Async
     @Override
-    public Future detect(@NonNull String path, @NonNull String fileExtension,
+    public Future detect(@NonNull String path, @NonNull String mimeType,
                          @NonNull Map<String, List<FileModel>> result) {
-        result.put(path, readFiles(path, fileExtension));
+        result.put(path, readFiles(path, mimeType));
         return null;
     }
 
-    private List<FileModel> readFiles(String path, String fileExtension) {
+    private List<FileModel> readFiles(String path, String mimeType) {
         List<FileModel> result = null;
         Path start = Paths.get(path);
 
         try {
             result = Files.walk(start)
-                    .filter(filePath -> isHasSameFileExtension(filePath, fileExtension))
+                    .filter(filePath -> checkType(filePath, mimeType))
                     .map(this::mapIntoFileModel)
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -50,9 +52,20 @@ public class FilesDetectionThreadImpl implements FilesDetectionThread {
         return result;
     }
 
-    private Boolean isHasSameFileExtension(Path filePath, String fileExtension) {
-        return filePath.toString()
-                .endsWith(fileExtension);
+    private Boolean checkType(Path filePath, String mimeType) {
+        Tika tika = new Tika();
+
+        try {
+            return Optional.of(tika.detect(filePath))
+                    .map(type -> isTypeEquals(type, mimeType))
+                    .get();
+        } catch (IOException | NullPointerException e) {
+            return Boolean.FALSE;
+        }
+    }
+
+    private Boolean isTypeEquals(String type, String mimeType) {
+        return type.equals(mimeType);
     }
 
     private FileModel mapIntoFileModel(Path filePath) {

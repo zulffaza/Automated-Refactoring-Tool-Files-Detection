@@ -4,6 +4,7 @@ import com.finalproject.automated.refactoring.tool.files.detection.model.FileMod
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +31,13 @@ public class FilesDetectionThreadImplTest {
     @Test
     public void detect_success() {
         String path = "src";
-        String fileExtension = ".java";
+        String mimeType = "text/x-java-source";
 
         Integer pathCount = 1;
         Integer classCount = 9;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future thread = filesDetectionThread.detect(path, fileExtension, result);
+        Future thread = filesDetectionThread.detect(path, mimeType, result);
 
         assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
@@ -45,13 +46,14 @@ public class FilesDetectionThreadImplTest {
 
     @Test
     public void detect_failed_pathNotFound() {
-        String path = "not/found/path";
-        String fileExtension = ".java";
+        String path = new File("not/found/path")
+                .getPath();
+        String mimeType = "text/x-java-source";
 
         Integer pathCount = 1;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future thread = filesDetectionThread.detect(path, fileExtension, result);
+        Future thread = filesDetectionThread.detect(path, mimeType, result);
 
         assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
@@ -60,14 +62,14 @@ public class FilesDetectionThreadImplTest {
 
     @Test(expected = NullPointerException.class)
     public void detect_failed_pathIsNull() {
-        String fileExtension = ".java";
+        String mimeType = "text/x-java-source";
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        filesDetectionThread.detect(null, fileExtension, result);
+        filesDetectionThread.detect(null, mimeType, result);
     }
 
     @Test(expected = NullPointerException.class)
-    public void detect_failed_fileExtensionIsNull() {
+    public void detect_failed_mimeTypeIsNull() {
         String path = "src";
 
         Map<String, List<FileModel>> result = new HashMap<>();
@@ -77,8 +79,8 @@ public class FilesDetectionThreadImplTest {
     @Test(expected = NullPointerException.class)
     public void detect_failed_resultIsNull() {
         String path = "src";
-        String fileExtension = ".java";
+        String mimeType = "text/x-java-source";
 
-        filesDetectionThread.detect(path, fileExtension, null);
+        filesDetectionThread.detect(path, mimeType, null);
     }
 }

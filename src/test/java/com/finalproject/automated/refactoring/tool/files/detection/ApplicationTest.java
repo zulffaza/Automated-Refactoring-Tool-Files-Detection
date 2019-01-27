@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ApplicationTest {
     private FilesDetection filesDetection;
 
     private static final String PATH = "src";
-    private static final String FILES_EXTENSION = ".java";
+    private static final String MIME_TYPE = "text/x-java-source";
 
     private static final Integer NUMBER_OF_PATH = 3;
 
@@ -44,7 +45,7 @@ public class ApplicationTest {
 
     @Test
     public void filesDetection_singlePath_success() {
-        List<FileModel> fileModels = filesDetection.detect(PATH, FILES_EXTENSION);
+        List<FileModel> fileModels = filesDetection.detect(PATH, MIME_TYPE);
 
         assertEquals(fileModelsExpected.size(), fileModels.size());
         assertFileModels(fileModels);
@@ -53,34 +54,30 @@ public class ApplicationTest {
     @Test
     public void filesDetection_multiPath_success() {
         Map<String, List<FileModel>> result = filesDetection.detect(
-                Collections.nCopies(NUMBER_OF_PATH, PATH), FILES_EXTENSION);
+                Collections.nCopies(NUMBER_OF_PATH, PATH), MIME_TYPE);
 
-        result.forEach((path, fileModels) -> {
-            assertEquals(PATH, path);
-            assertEquals(fileModelsExpected.size(), fileModels.size());
-            assertFileModels(fileModels);
-        });
+        result.forEach(this::assertFilesDetectionMultiPathSuccess);
     }
 
     @Test(expected = NullPointerException.class)
     public void filesDetection_singlePath_failed_pathIsNull() {
         String path = null;
-        filesDetection.detect(path, FILES_EXTENSION);
+        filesDetection.detect(path, MIME_TYPE);
     }
 
     @Test(expected = NullPointerException.class)
-    public void filesDetection_singlePath_failed_fileExtensionIsNull() {
+    public void filesDetection_singlePath_failed_mimeTypeIsNull() {
         filesDetection.detect(PATH, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void filesDetection_multiPath_failed_listOfPathIsNull() {
         List<String> paths = null;
-        filesDetection.detect(paths, FILES_EXTENSION);
+        filesDetection.detect(paths, MIME_TYPE);
     }
 
     @Test(expected = NullPointerException.class)
-    public void filesDetection_multiPath_failed_fileExtensionIsNull() {
+    public void filesDetection_multiPath_failed_mimeTypeIsNull() {
         filesDetection.detect(Collections.nCopies(NUMBER_OF_PATH, PATH), null);
     }
 
@@ -88,58 +85,71 @@ public class ApplicationTest {
         List<FileModel> fileModels = new ArrayList<>();
 
         fileModels.add(FileModel.builder()
-                .path("src/test/java/com/finalproject/automated/refactoring/tool/files/detection")
-                .filename("ApplicationTest.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("FilesDetectionThreadImplTest.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("FilesDetectionImplTest.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/test/java/com/finalproject/automated/refactoring/tool/configuration")
-                .filename("AsyncConfig.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/test/java/com/finalproject/automated/refactoring/tool")
-                .filename("Application.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service")
-                .filename("FilesDetectionThread.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service")
+                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service"))
                 .filename("FilesDetection.java")
                 .build());
 
         fileModels.add(FileModel.builder()
-                .path("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
+                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service"))
+                .filename("FilesDetectionThread.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
+                .filename("FilesDetectionImpl.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
                 .filename("FilesDetectionThreadImpl.java")
                 .build());
 
         fileModels.add(FileModel.builder()
-                .path("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation")
-                .filename("FilesDetectionImpl.java")
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool"))
+                .filename("Application.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/configuration"))
+                .filename("AsyncConfig.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection"))
+                .filename("ApplicationTest.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
+                .filename("FilesDetectionImplTest.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
+                .filename("FilesDetectionThreadImplTest.java")
                 .build());
 
         return fileModels;
     }
 
+    private String getEnvironmentPath(String path) {
+        return new File(path).getPath();
+    }
+
     private void assertFileModels(List<FileModel> fileModels) {
-        for (int index = 0; index < fileModels.size(); index++) {
-            assertEquals(fileModelsExpected.get(index).getPath(), fileModels.get(index).getPath());
-            assertEquals(fileModelsExpected.get(index).getFilename(), fileModels.get(index).getFilename());
-            assertNotNull(fileModels.get(index).getContent());
-        }
+        for (int index = 0; index < fileModels.size(); index++)
+            assertFileModel(fileModelsExpected.get(index), fileModels.get(index));
+    }
+
+    private void assertFileModel(FileModel expectedFileModel, FileModel fileModel) {
+        assertEquals(expectedFileModel.getPath(), fileModel.getPath());
+        assertEquals(expectedFileModel.getFilename(), fileModel.getFilename());
+        assertNotNull(fileModel.getContent());
+    }
+
+    private void assertFilesDetectionMultiPathSuccess(String path, List<FileModel> fileModels) {
+        assertEquals(PATH, path);
+        assertEquals(fileModelsExpected.size(), fileModels.size());
+        assertFileModels(fileModels);
     }
 }
