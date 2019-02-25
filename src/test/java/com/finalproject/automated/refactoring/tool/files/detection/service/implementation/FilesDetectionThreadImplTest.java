@@ -8,7 +8,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -34,12 +33,11 @@ public class FilesDetectionThreadImplTest {
         String mimeType = "text/x-java-source";
 
         Integer pathCount = 1;
-        Integer classCount = 9;
+        Integer classCount = 8;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future thread = filesDetectionThread.detect(path, mimeType, result);
+        filesDetectionThread.detect(path, mimeType, result);
 
-        assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
         assertEquals(classCount.intValue(), result.get(path).size());
     }
@@ -53,9 +51,8 @@ public class FilesDetectionThreadImplTest {
         Integer pathCount = 1;
 
         Map<String, List<FileModel>> result = new HashMap<>();
-        Future thread = filesDetectionThread.detect(path, mimeType, result);
+        filesDetectionThread.detect(path, mimeType, result);
 
-        assertNull(thread);
         assertEquals(pathCount.intValue(), result.size());
         assertNull(result.get(path));
     }

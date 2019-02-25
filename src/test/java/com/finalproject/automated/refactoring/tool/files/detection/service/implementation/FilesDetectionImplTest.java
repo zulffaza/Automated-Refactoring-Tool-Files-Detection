@@ -2,7 +2,6 @@ package com.finalproject.automated.refactoring.tool.files.detection.service.impl
 
 import com.finalproject.automated.refactoring.tool.files.detection.model.FileModel;
 import com.finalproject.automated.refactoring.tool.files.detection.service.FilesDetectionThread;
-import com.finalproject.automated.refactoring.tool.utils.service.ThreadsWatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,12 +15,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -41,12 +37,6 @@ public class FilesDetectionImplTest {
     @MockBean
     private FilesDetectionThread filesDetectionThread;
 
-    @MockBean
-    private ThreadsWatcher threadsWatcher;
-
-    @Value("${threads.waiting.time}")
-    private Integer waitingTime;
-
     private static final String PATH = "src";
     private static final String MIME_TYPE = "text/x-java-source";
 
@@ -55,38 +45,8 @@ public class FilesDetectionImplTest {
 
     @Before
     public void setUp() {
-        Future thread = new Future() {
-
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return true;
-            }
-
-            @Override
-            public Object get() {
-                return null;
-            }
-
-            @Override
-            public Object get(long timeout, TimeUnit unit) {
-                return null;
-            }
-        };
-
-        when(filesDetectionThread.detect(eq(PATH), eq(MIME_TYPE),
-                eq(Collections.synchronizedMap(new HashMap<>())))).thenReturn(thread);
-        doNothing().when(threadsWatcher)
-                .waitAllThreadsDone(anyList(), eq(waitingTime));
+        doNothing().when(filesDetectionThread)
+                .detect(eq(PATH), eq(MIME_TYPE), eq(Collections.synchronizedMap(new HashMap<>())));
     }
 
     @Test
@@ -95,7 +55,6 @@ public class FilesDetectionImplTest {
         assertNull(result);
 
         verifyFilesDetectionThread(INVOKED_ONCE);
-        verifyThreadsWatcher();
     }
 
     @Test
@@ -105,7 +64,6 @@ public class FilesDetectionImplTest {
         assertNotNull(result);
 
         verifyFilesDetectionThread(NUMBER_OF_PATH);
-        verifyThreadsWatcher();
     }
 
     @Test(expected = NullPointerException.class)
@@ -134,11 +92,5 @@ public class FilesDetectionImplTest {
         verify(filesDetectionThread, times(invocationsTimes)).detect(eq(PATH), eq(MIME_TYPE),
                 eq(Collections.synchronizedMap(new HashMap<>())));
         verifyNoMoreInteractions(filesDetectionThread);
-    }
-
-    private void verifyThreadsWatcher() {
-        verify(threadsWatcher, times(INVOKED_ONCE))
-                .waitAllThreadsDone(anyList(), eq(waitingTime));
-        verifyNoMoreInteractions(threadsWatcher);
     }
 }
