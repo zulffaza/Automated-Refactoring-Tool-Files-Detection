@@ -4,7 +4,6 @@ import com.finalproject.automated.refactoring.tool.files.detection.model.FileMod
 import com.finalproject.automated.refactoring.tool.files.detection.service.FilesDetectionThread;
 import lombok.NonNull;
 import org.apache.tika.Tika;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 /**
@@ -28,12 +26,11 @@ public class FilesDetectionThreadImpl implements FilesDetectionThread {
 
     private static final String NEW_LINE_DELIMITER = "\n";
 
-    @Async
     @Override
-    public Future detect(@NonNull String path, @NonNull String mimeType,
-                         @NonNull Map<String, List<FileModel>> result) {
-        result.put(path, readFiles(path, mimeType));
-        return null;
+    public void detect(@NonNull String path, @NonNull String mimeType,
+                       @NonNull Map<String, List<FileModel>> result) {
+        List<FileModel> files = readFiles(path, mimeType);
+        result.put(path, files);
     }
 
     private List<FileModel> readFiles(String path, String mimeType) {

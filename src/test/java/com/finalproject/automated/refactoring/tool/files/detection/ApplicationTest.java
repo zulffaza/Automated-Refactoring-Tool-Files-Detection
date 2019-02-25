@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author fazazulfikapp
@@ -46,6 +46,8 @@ public class ApplicationTest {
     @Test
     public void filesDetection_singlePath_success() {
         List<FileModel> fileModels = filesDetection.detect(PATH, MIME_TYPE);
+
+        fileModels.forEach(fileModel -> System.out.println(fileModel.getPath() + File.separator + fileModel.getFilename()));
 
         assertEquals(fileModelsExpected.size(), fileModels.size());
         assertFileModels(fileModels);
@@ -85,6 +87,16 @@ public class ApplicationTest {
         List<FileModel> fileModels = new ArrayList<>();
 
         fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool"))
+                .filename("Application.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection"))
+                .filename("ApplicationTest.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
                 .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service"))
                 .filename("FilesDetection.java")
                 .build());
@@ -100,28 +112,13 @@ public class ApplicationTest {
                 .build());
 
         fileModels.add(FileModel.builder()
-                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
-                .filename("FilesDetectionThreadImpl.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool"))
-                .filename("Application.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/configuration"))
-                .filename("AsyncConfig.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
-                .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection"))
-                .filename("ApplicationTest.java")
-                .build());
-
-        fileModels.add(FileModel.builder()
                 .path(getEnvironmentPath("src/test/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
                 .filename("FilesDetectionImplTest.java")
+                .build());
+
+        fileModels.add(FileModel.builder()
+                .path(getEnvironmentPath("src/main/java/com/finalproject/automated/refactoring/tool/files/detection/service/implementation"))
+                .filename("FilesDetectionThreadImpl.java")
                 .build());
 
         fileModels.add(FileModel.builder()
@@ -137,14 +134,7 @@ public class ApplicationTest {
     }
 
     private void assertFileModels(List<FileModel> fileModels) {
-        for (int index = 0; index < fileModels.size(); index++)
-            assertFileModel(fileModelsExpected.get(index), fileModels.get(index));
-    }
-
-    private void assertFileModel(FileModel expectedFileModel, FileModel fileModel) {
-        assertEquals(expectedFileModel.getPath(), fileModel.getPath());
-        assertEquals(expectedFileModel.getFilename(), fileModel.getFilename());
-        assertNotNull(fileModel.getContent());
+        assertTrue(fileModelsExpected.containsAll(fileModels));
     }
 
     private void assertFilesDetectionMultiPathSuccess(String path, List<FileModel> fileModels) {

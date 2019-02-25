@@ -15,6 +15,6 @@ import java.util.concurrent.Future;
 
 public interface FilesDetectionThread {
 
-    Future detect(@NonNull String path, @NonNull String mimeType,
-                  @NonNull Map<String, List<FileModel>> result);
+    void detect(@NonNull String path, @NonNull String mimeType,
+                @NonNull Map<String, List<FileModel>> result);
 }
