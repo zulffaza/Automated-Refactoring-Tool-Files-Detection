@@ -38,11 +38,6 @@
             <artifactId>files-detection-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.final-project.automated-refactoring-tool</groupId>
-            <artifactId>utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.tika</groupId>
@@ -65,14 +60,6 @@
         <repository>
             <id>Automated-Refactoring-Tool-Files-Detection-Model</id>
             <url>https://raw.github.com/zulffaza/Automated-Refactoring-Tool-Files-Detection-Model/mvn-repo/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>Automated-Refactoring-Tool-Utils</id>
-            <url>https://raw.github.com/zulffaza/Automated-Refactoring-Tool-Utils/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
